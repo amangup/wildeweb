@@ -2,11 +2,30 @@
 
 ## sample dataset
 
+- See `soft_skills_classification.ipynb` for the process to gather initial set of grading of documents.
+
 ### CPT model
+
+- See `/cpt`
+- Using torchtune to full finetune a Llama 70B model
 
 ### Vibe check safety
 
-### Real Toxicity Prompts
+- see `/safety`
+- A notebook for some hands on testing
+
+### Salad Bench BaseQ 5k
+
+- see `/safety`
+- Notebooks for generation of completions and safety classification.
+
+#### Meta LLama
+
+0.574
+
+#### WildeWeb Sample
+
+0.609
 
 ### Other evals
 
@@ -63,5 +82,6 @@
 |machine_learning        |      1|none  |     0|acc   |↑  |0.6518|±  |0.0452|
 |professional_law        |      1|none  |     0|acc   |↑  |0.6037|±  |0.0125|
 |professional_medicine   |      1|none  |     0|acc   |↑  |0.8566|±  |0.0213|
+
 
 ## Classifer training
