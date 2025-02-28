@@ -1,5 +1,5 @@
 from accelerate import Accelerator
-from datasets import load_dataset
+from datasets import load_dataset, Dataset
 from dotenv import load_dotenv
 from transformers import AutoTokenizer
 from transformers import AutoModelForSequenceClassification
@@ -10,6 +10,7 @@ import datetime
 import wandb
 import os
 import numpy as np
+import pandas as pd
 import evaluate
 import torch
 
@@ -19,6 +20,31 @@ BERT_MODEL = "bert-base-cased"
 
 load_dotenv()
 os.environ["WANDB_PROJECT"]="soft_skills_classifier_bert_base"
+
+
+def even_sampling(dataset):
+    df = pd.DataFrame(dataset)
+
+    # Get count of the least represented label
+    label_counts = df['label'].value_counts()
+    min_count = label_counts.min()
+
+    # Create balanced dataset by sampling equal numbers from each label
+    balanced_df = pd.DataFrame()
+    for label in range(len(label_counts)):
+        label_subset = df[df['label'] == label].sample(min_count, random_state=42)
+        balanced_df = pd.concat([balanced_df, label_subset])
+
+    # Shuffle the dataset
+    balanced_df = balanced_df.sample(frac=1, random_state=42).reset_index(drop=True)
+
+    # Convert back to Huggingface dataset
+    balanced_dataset = Dataset.from_pandas(balanced_df)
+
+    print(f"Original distribution: {label_counts}")
+    print(f"New distribution: {balanced_df['label'].value_counts()}")
+
+    return balanced_dataset
 
 def tokenize_function(tokenizer, examples):
     return tokenizer(examples["text"], padding="max_length", truncation=True, max_length=512)
@@ -33,8 +59,9 @@ def compute_metrics(metric, eval_pred):
 def main():
     wandb.login()
 
-    dataset = load_dataset(DATASET_NAME)['train'].select(range(100_000))
+    dataset = load_dataset(DATASET_NAME)['train'].select(range(1000_000))
     dataset = dataset.map(lambda score: {"label": max(0, score-1)}, input_columns=["classification_score"])
+    dataset = even_sampling(dataset)
     tokenizer = AutoTokenizer.from_pretrained("bert-base-cased")
         
     tokenized_dataset = dataset.map(lambda rows: tokenize_function(tokenizer, rows), batched=True)
@@ -69,10 +96,7 @@ def main():
         save_total_limit=1,
         bf16=True,
         save_safetensors=False,
-        max_steps=20
     )
-
-    os.environ["WANDB_DISABLED"] = "false"
 
     trainer = Trainer(
         model=model,
