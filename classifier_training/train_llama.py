@@ -49,6 +49,7 @@ def chat_messages(tokenizer, examples):
 def compute_metrics(metric, eval_pred):
     logits, labels = eval_pred
     predictions = np.argmax(logits, axis=-1)
+    # tokenizer decode -> 
     return metric.compute(predictions=predictions, references=labels)
 
 
