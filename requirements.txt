@@ -2,3 +2,4 @@ evaluate
 wandb
 scikit-learn
 accelerate
+trl
