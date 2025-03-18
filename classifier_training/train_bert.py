@@ -1,5 +1,5 @@
 from accelerate import Accelerator
-from datasets import load_dataset, Dataset
+from datasets import load_dataset
 from dotenv import load_dotenv
 from transformers import AutoTokenizer
 from transformers import AutoModelForSequenceClassification
@@ -9,7 +9,6 @@ import datetime
 import wandb
 import os
 import numpy as np
-import pandas as pd
 import evaluate
 import torch
 
